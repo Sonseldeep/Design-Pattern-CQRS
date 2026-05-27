@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using LeanrCQRS.Domain.Users;
 using LearnCQRS.Application.Common.Interfaces;
-using LearnCQRS.Infrastructure.Authentication.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -28,12 +27,9 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(JwtRegisteredClaimNames.Name, user.FirstName),
             new(JwtRegisteredClaimNames.FamilyName, user.LastName),
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new("id", user.Id.ToString()),
-            new("permissions", "gyms:create"),
-            new("permissions", "gyms:update"),
+            new("id", user.Id.ToString())
         };
 
-        AddIds(user, claims);
         AddRoles(user, claims);
 
         var token = new JwtSecurityToken(
@@ -47,20 +43,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private static void AddIds(User user, List<Claim> claims)
-    {
-        claims
-            .AddIfValueNotNull("adminId", user.AdminId?.ToString())
-            .AddIfValueNotNull("trainerId", user.TrainerId?.ToString())
-            .AddIfValueNotNull("participantId", user.ParticipantId?.ToString());
-    }
-
     private static void AddRoles(User user, List<Claim> claims)
     {
-        user.GetProfileTypes().ForEach(type =>
-        {
-            // Use ClaimTypes.Role so ASP.NET recognizes roles naturally
-            claims.Add(new Claim(ClaimTypes.Role, type.ToString()));
-        });
+        claims.AddRange(user.GetRoles().Select(role => new Claim(ClaimTypes.Role, role.ToString())));
     }
 }

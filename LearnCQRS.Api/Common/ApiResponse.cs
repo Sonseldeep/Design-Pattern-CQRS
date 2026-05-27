@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Collections.Generic;
 
 namespace LearnCQRS.Api.Common;
 
@@ -9,7 +8,7 @@ public class ApiResponse<T>
     public HttpStatusCode StatusCode { get; set; }
     public T? Data { get; set; }
     public string? Message { get; set; }
-    public List<string> Errors { get; set; } = new List<string>();
+    public List<string> Errors { get; set; } = [];
 
     public static ApiResponse<T> SuccessResponse(
         T? data,
@@ -46,7 +45,7 @@ public class ApiResponse<T>
             IsSuccess = false,
             StatusCode = statusCode,
             Message = errorMessage,
-            Errors = new List<string> { errorMessage }
+            Errors = [errorMessage]
         };
     }
 

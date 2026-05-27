@@ -9,10 +9,10 @@ public class User : Entity
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
     public string Email { get; set; } = null!;
-    public Guid? AdminId { get; private set; }
-    public Guid? ParticipantId { get; private set; }
-    public Guid? TrainerId { get; private set; }
-
+    
+    private readonly HashSet<Role> _roles = [];
+    public IReadOnlyCollection<Role> Roles => _roles;
+   
     private readonly string _passwordHash = null!;
 
     public User(
@@ -20,83 +20,34 @@ public class User : Entity
         string lastName,
         string email,
         string passwordHash,
-        Guid? adminId = null,
-        Guid? participantId = null,
-        Guid? trainerId = null,
+        IEnumerable<Role>? roles = null,
         Guid? id = null)
             : base(id ?? Guid.NewGuid())
     {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
-        AdminId = adminId;
-        ParticipantId = participantId;
-        TrainerId = trainerId;
         _passwordHash = passwordHash;
+        if (roles is null) return;
+        foreach (var role in roles)
+            _roles.Add(role);
     }
 
+    public void AddRole(Role role)
+    {
+        _roles.Add(role);
+    }
+    public void RemoveRole(Role role)
+    {
+        _roles.Remove(role);
+    }
+
+    public List<Role> GetRoles()
+        => _roles.ToList();
+    
     public bool IsCorrectPasswordHash(string password, IPasswordHasher passwordHasher)
     {
         return passwordHasher.IsCorrectPassword(password, _passwordHash);
     }
-
-    public ErrorOr<Guid> CreateAdminProfile()
-    {
-        if (AdminId is not null)
-        {
-            return Error.Conflict(description: "User already has an admin profile");
-        }
-
-        AdminId = Guid.NewGuid();
-
-        return AdminId.Value;
-    }
-
-    public ErrorOr<Guid> CreateParticipantProfile()
-    {
-        if (ParticipantId is not null)
-        {
-            return Error.Conflict(description: "User already has a participant profile");
-        }
-
-        ParticipantId = Guid.NewGuid();
-
-        return ParticipantId.Value;
-    }
-
-    public ErrorOr<Guid> CreateTrainerProfile()
-    {
-        if (TrainerId is not null)
-        {
-            return Error.Conflict(description: "User already has a trainer profile");
-        }
-
-        TrainerId = Guid.NewGuid();
-
-        return TrainerId.Value;
-    }
-
-    public List<ProfileType> GetProfileTypes()
-    {
-        var profileTypes = new List<ProfileType>();
-
-        if (AdminId is not null)
-        {
-            profileTypes.Add(ProfileType.Admin);
-        }
-
-        if (TrainerId is not null)
-        {
-            profileTypes.Add(ProfileType.Trainer);
-        }
-
-        if (ParticipantId is not null)
-        {
-            profileTypes.Add(ProfileType.Participant);
-        }
-
-        return profileTypes;
-    }
-
     private User() { }
 }

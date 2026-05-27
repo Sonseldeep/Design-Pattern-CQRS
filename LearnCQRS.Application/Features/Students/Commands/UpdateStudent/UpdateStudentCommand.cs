@@ -4,8 +4,7 @@ using MediatR;
 
 namespace LearnCQRS.Application.Features.Students.Commands.UpdateStudent;
 
-[Authorize(Roles = LeanrCQRS.Domain.Common.Roles.Admin)]
-
+[Authorize(Roles = "Admin")]
 public record UpdateStudentCommand(
     Guid Id,
     string FirstName,

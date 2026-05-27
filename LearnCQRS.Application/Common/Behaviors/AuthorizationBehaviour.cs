@@ -26,15 +26,7 @@ public class AuthorizationBehavior<TRequest, TResponse>(ICurrentUserProvider _cu
         }
 
         var currentUser = _currentUserProvider.GetCurrentUser();
-
-        var requiredPermissions = authorizationAttributes
-            .SelectMany(authorizationAttribute => authorizationAttribute.Permissions?.Split(',') ?? [])
-            .ToList();
-
-        if (requiredPermissions.Except(currentUser.Permissions).Any())
-        {
-            return (dynamic)Error.Unauthorized(description: "User is forbidden from taking this action");
-        }
+        
 
         var requiredRoles = authorizationAttributes
             .SelectMany(authorizationAttribute => authorizationAttribute.Roles?.Split(',') ?? [])
@@ -45,6 +37,6 @@ public class AuthorizationBehavior<TRequest, TResponse>(ICurrentUserProvider _cu
             return (dynamic)Error.Unauthorized(description: "User is forbidden from taking this action");
         }
 
-        return await next();
+        return await next(cancellationToken);
     }
 }
