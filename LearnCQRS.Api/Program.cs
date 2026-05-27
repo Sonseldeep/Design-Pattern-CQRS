@@ -6,19 +6,21 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddApiServiceCollection();
 builder.Services.AddOpenApi();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure(builder.Configuration)
+    .AddAuthentication(builder.Configuration); 
 
 
 
 var app = builder.Build();
+
 app.UseGlobalExceptionHandler();
+app.AddInfrastructureMiddleware();
 
 if (app.Environment.IsDevelopment())
 {
@@ -26,8 +28,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -11,7 +11,7 @@ namespace LearnCQRS.Api.Controllers.Students;
 
 [ApiController]
 [Route("api/students")]
-public class StudentsController : AppControllerBase
+public class StudentsController : ApiController
 {
     private readonly IMediator _mediator;
 
